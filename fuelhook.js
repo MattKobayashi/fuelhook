@@ -1,4 +1,4 @@
-var settings = {"regions":["All"],"prices":[["U95",130],["U98",135],["Diesel",135]]};
+var settings = {"regions":["All"],"prices":[["U95",500],["U98",500],["Diesel",500]]};
 
 function myFunction() {
   // Reset data if the settings changed.
