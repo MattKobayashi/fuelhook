@@ -66,7 +66,7 @@ if e10Price != float(e10LastPrice):
         content += ":arrow_up:\t\t"
     else:
         content += ":arrow_down:\t\t"
-    content += ":fuelpump: U91\t\t:dollar: " + str(e10Price) + "\t\t:map: " + str(e10Location) + "\n\n"
+    content += ":fuelpump: E10\t\t:dollar: " + str(e10Price) + "\t\t:map: " + str(e10Location) + "\n\n"
 
 # Alert on U91 change
 if u91Price != float(u91LastPrice):
@@ -82,7 +82,7 @@ if u95Price != float(u95LastPrice):
         content += ":arrow_up:\t\t"
     else:
         content += ":arrow_down:\t\t"
-    content += ":fuelpump: U91\t\t:dollar: " + str(u95Price) + "\t\t:map: " + str(u95Location) + "\n\n"
+    content += ":fuelpump: U95\t\t:dollar: " + str(u95Price) + "\t\t:map: " + str(u95Location) + "\n\n"
 
 # Alert on U98 change
 if u98Price != float(u98LastPrice):
@@ -90,7 +90,7 @@ if u98Price != float(u98LastPrice):
         content += ":arrow_up:\t\t"
     else:
         content += ":arrow_down:\t\t"
-    content += ":fuelpump: U91\t\t:dollar: " + str(u98Price) + "\t\t:map: " + str(u98Location) + "\n\n"
+    content += ":fuelpump: U98\t\t:dollar: " + str(u98Price) + "\t\t:map: " + str(u98Location) + "\n\n"
 
 # Alert on Diesel change
 if dieselPrice != float(dieselLastPrice):
@@ -98,7 +98,7 @@ if dieselPrice != float(dieselLastPrice):
         content += ":arrow_up:\t\t"
     else:
         content += ":arrow_down:\t\t"
-    content += ":fuelpump: U91\t\t:dollar: " + str(dieselPrice) + "\t\t:map: " + str(dieselLocation) + "\n\n"
+    content += ":fuelpump: Diesel\t\t:dollar: " + str(dieselPrice) + "\t\t:map: " + str(dieselLocation) + "\n\n"
 
 # Alert on LPG change
 if lpgPrice != float(lpgLastPrice):
@@ -106,7 +106,7 @@ if lpgPrice != float(lpgLastPrice):
         content += ":arrow_up:\t\t"
     else:
         content += ":arrow_down:\t\t"
-    content += ":fuelpump: U91\t\t:dollar: " + str(lpgPrice) + "\t\t:map: " + str(lpgLocation) + "\n\n"
+    content += ":fuelpump: LPG\t\t:dollar: " + str(lpgPrice) + "\t\t:map: " + str(lpgLocation) + "\n\n"
 
 if content != "":
     content += "Prices are correct as of " + strftime("%a %d %b %Y %H:%M:%S", gmtime(lastUpdated)) + "\n@everyone"
