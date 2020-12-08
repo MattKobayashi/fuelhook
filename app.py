@@ -46,7 +46,7 @@ lpgPrice = float(priceData['regions'][int(os.environ.get('REGION'))]['prices'][5
 lpgLocation = str(priceData['regions'][int(os.environ.get('REGION'))]['prices'][5]['suburb'] + ", " + priceData['regions'][int(os.environ.get('REGION'))]['prices'][5]['state'])
 
 # Print the last updated time
-print("Prices last updated at: ", strftime("%a %d %b %Y %H:%M:%S", gmtime(lastUpdated)))
+print("Prices last updated at: ", strftime("%a %d %b %Y %H:%M:%S", localtime(lastUpdated)))
 
 # Print the current prices
 print("\nBest E10 price: ", e10Price, "\nLocated at: ", e10Location)
@@ -109,7 +109,7 @@ if lpgPrice != float(lpgLastPrice):
     content += ":fuelpump: LPG\t\t:dollar: " + str(lpgPrice) + "\t\t:map: " + str(lpgLocation) + "\n\n"
 
 if content != "":
-    content += "Prices are correct as of " + strftime("%a %d %b %Y %H:%M:%S", gmtime(lastUpdated)) + "\n@everyone"
+    content += "Prices are correct as of " + strftime("%a %d %b %Y %H:%M:%S", localtime(lastUpdated)) + "\n@everyone"
     requests.post(webhookUrl, data={ 'content': content })
 
 # Write the current price to the pickle file
