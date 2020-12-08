@@ -10,5 +10,5 @@ services:
         restart: unless-stopped
         environment:
           - "TZ=Australia/Brisbane"
-          - "REGION=0
+          - "REGION=0"
           - "DISCORD_WH_URL="
