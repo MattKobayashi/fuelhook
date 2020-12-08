@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+    amber-alert:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: fuelhook
+        container_name: fuelhook
+        restart: unless-stopped
+        environment:
+          - "TZ=Australia/Brisbane"
+          - "REGION=0
+          - "DISCORD_WH_URL="
