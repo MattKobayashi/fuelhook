@@ -8,11 +8,14 @@ COPY app.py app.py
 RUN chmod 0644 /etc/cron.d/fuelhook-cron \
     && crontab /etc/cron.d/fuelhook-cron \
     && touch /var/log/cron.log \
+    && mkdir data \
     && pip install requests \
     && apk add --no-cache tzdata
 
 ENV TZ=Australia/Brisbane
 ENV REGION=0
 ENV DISCORD_WH_URL=
+
+VOLUME ["/opt/fuelhook/data"]
 
 ENTRYPOINT ["crond", "-f"]

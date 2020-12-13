@@ -12,3 +12,11 @@ services:
         - "TZ=Australia/Brisbane"
         - "REGION=0"
         - "DISCORD_WH_URL="
+      volumes:
+        - type: volume
+          source: fuelhook_data
+          target: /opt/fuelhook/data
+
+volumes:
+  fuelhook_data:
+    name: fuelhook_data
