@@ -6,14 +6,14 @@ from time import strftime, localtime, gmtime
 from datetime import datetime
 
 # Create pickle file if it doesn't already exist
-if not os.path.isfile('data/lastprices.pkl'):
+if not os.path.isfile('/opt/fuelhook/data/lastprices.pkl'):
     blankPrice = ["0", "0", "0", "0", "0", "0"]
     with open('data/lastprices.pkl', 'wb') as file:
         pickle.dump(blankPrice, file)
         file.close()
 
 # Read last prices from pickle file
-with open('data/lastprices.pkl', 'rb') as file:
+with open('/opt/fuelhook/data/lastprices.pkl', 'rb') as file:
     e10LastPrice, u91LastPrice, u95LastPrice, u98LastPrice, dieselLastPrice, lpgLastPrice = pickle.load(file)
     file.close()
 
@@ -113,7 +113,7 @@ if content != "":
     requests.post(webhookUrl, data={ 'content': content })
 
 # Write the current price to the pickle file
-with open('data/lastprices.pkl', 'wb') as file:
+with open('/opt/fuelhook/data/lastprices.pkl', 'wb') as file:
     pickle.dump([e10Price, u91Price, u95Price, u98Price, dieselPrice, lpgPrice], file)
     file.close()
 
