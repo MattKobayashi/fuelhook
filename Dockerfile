@@ -2,20 +2,32 @@ FROM python:3.9-alpine3.12
 
 WORKDIR /opt/fuelhook
 
-COPY fuelhook-cron /etc/cron.d/fuelhook-cron
-COPY app.py app.py
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.1.12/supercronic-linux-amd64 \
+    SUPERCRONIC=supercronic-linux-amd64 \
+    SUPERCRONIC_SHA1SUM=048b95b48b708983effb2e5c935a1ef8483d9e3e
 
-RUN chmod 0644 /etc/cron.d/fuelhook-cron \
-    && crontab /etc/cron.d/fuelhook-cron \
-    && touch /var/log/cron.log \
-    && mkdir data \
-    && pip install requests \
+RUN wget "$SUPERCRONIC_URL" \
+    && echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - \
+    && chmod +x "$SUPERCRONIC" \
+    && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
+    && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic \
+    && addgroup -S fuelhook && adduser -S fuelhook -G fuelhook \
+    && mkdir -p data \
+    && chown fuelhook:fuelhook data \
     && apk add --no-cache tzdata
 
-ENV TZ=Australia/Brisbane
-ENV REGION=0
-ENV DISCORD_WH_URL=
+COPY fuelhook-cron ./crontab/fuelhook-cron
+COPY app.py app.py
+COPY requirements.txt requirements.txt
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV TZ=UTC \
+    REGION=0 \
+    DISCORD_WH_URL=
 
 VOLUME ["/opt/fuelhook/data"]
 
-ENTRYPOINT ["crond", "-f"]
+ENTRYPOINT ["supercronic", "./crontab/fuelhook-cron"]
+
+LABEL maintainer="matthew@thompsons.id.au"

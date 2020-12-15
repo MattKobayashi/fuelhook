@@ -5,9 +5,6 @@ import os
 from time import strftime, localtime, gmtime
 from datetime import datetime
 
-# Set the working directory for Python
-os.chdir('/opt/fuelhook')
-
 # Create pickle file if it doesn't already exist
 if not os.path.isfile('data/lastprices.pkl'):
     blankPrice = ["0", "0", "0", "0", "0", "0"]

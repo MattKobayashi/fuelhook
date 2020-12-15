@@ -9,7 +9,7 @@ services:
       container_name: fuelhook
       restart: unless-stopped
       environment:
-        - "TZ=Australia/Brisbane"
+        - "TZ=UTC"
         - "REGION=0"
         - "DISCORD_WH_URL="
       volumes:
