@@ -14,6 +14,7 @@ RUN wget "$SUPERCRONIC_URL" \
     && addgroup -S fuelhook && adduser -S fuelhook -G fuelhook \
     && mkdir -p data \
     && chown fuelhook:fuelhook data \
+    && apk --no-cache upgrade \
     && apk add --no-cache tzdata
 
 COPY fuelhook-cron ./crontab/fuelhook-cron
