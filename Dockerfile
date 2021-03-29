@@ -17,6 +17,8 @@ RUN wget "$SUPERCRONIC_URL" \
     && apk --no-cache upgrade \
     && apk add --no-cache tzdata
 
+USER fuelhook
+
 COPY fuelhook-cron ./crontab/fuelhook-cron
 COPY app.py app.py
 COPY requirements.txt requirements.txt
