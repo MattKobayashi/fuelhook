@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 ENV TZ=UTC \
     REGION=0 \
-    DISCORD_WH_URL=
+    WEBHOOK_URL=
 
 VOLUME ["/opt/fuelhook/data"]
 

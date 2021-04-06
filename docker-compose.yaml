@@ -11,7 +11,7 @@ services:
       environment:
         - "TZ=UTC"
         - "REGION=0"
-        - "DISCORD_WH_URL="
+        - "WEBHOOK_URL="
       volumes:
         - type: volume
           source: fuelhook_data

@@ -57,7 +57,7 @@ print("\nBest diesel price: ", dieselPrice, "\nLocated at: ", dieselLocation)
 print("\nBest LPG price: ", lpgPrice, "\nLocated at: ", lpgLocation)
 
 ## Configure the Discord webhook URL and post data
-webhookUrl = str(os.environ.get('DISCORD_WH_URL'))
+webhookUrl = str(os.environ.get('WEBHOOK_URL'))
 content = ""
 
 # Alert on E10 change
