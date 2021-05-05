@@ -111,6 +111,14 @@ if content != "":
     content += "Prices are correct as of " + strftime("%a %d %b %Y %H:%M:%S", localtime(lastUpdated)) + "\n@everyone"
     requests.post(webhookURL, data={ 'content': content })
 
+# Update price data with current prices
+priceDataFile['E10'] = priceE10
+priceDataFile['U91'] = priceU91
+priceDataFile['U95'] = priceU95
+priceDataFile['U98'] = priceU98
+priceDataFile['Diesel'] = priceDiesel
+priceDataFile['LPG'] = priceLPG
+
 # Write the current price to the JSON file
 with open('/opt/fuelhook/data/priceData.json', 'w') as file:
     json.dump(priceDataFile, file)
