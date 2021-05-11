@@ -19,7 +19,7 @@ with open('data/priceData.json', 'r') as file:
 apiURL = 'https://projectzerothree.info/api.php?format=json'
 
 # Get current price data from the API and parse the JSON
-apiResponse = requests.post(apiURL, headers={ 'User-Agent': 'FuelHook v2.1' })
+apiResponse = requests.post(apiURL, headers={ 'User-Agent': 'FuelHook v2.2.0' })
 priceDataAPI = json.loads(apiResponse.text)
 
 # Get the prices and locations into variables
