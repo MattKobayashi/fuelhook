@@ -33,4 +33,4 @@ VOLUME ["/opt/fuelhook/data"]
 
 ENTRYPOINT ["supercronic", "./crontab/fuelhook-cron"]
 
-LABEL maintainer="matthew@thompsons.id.au"
+LABEL maintainer="matthew@kobayashi.com.au"
