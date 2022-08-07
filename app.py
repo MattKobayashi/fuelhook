@@ -33,7 +33,7 @@ priceDataAPI = json.loads(apiResponse.text)
 lastUpdated = int(priceDataAPI["updated"])
 
 # Create list of dicts with fuel price data from API
-regionPref = int(os.environ.get("REGION"))
+regionPref = str(os.environ.get("REGION"))
 regionPrices = [
     copy.deepcopy(d) for d in priceDataAPI["regions"] if d["region"] == regionPref
 ][0]["prices"]
