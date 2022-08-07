@@ -5,7 +5,7 @@ import copy
 from time import strftime, localtime
 
 # Define fuel types to check
-fuelTypes = ["E10", "U91", "U95", "U98", "Diesel", "LPG"]
+fuelTypes = json.loads(os.environ.get("FUEL_TYPES"))
 
 # Set the URL for the ProjectZeroThree API
 apiURL = "https://projectzerothree.info/api.php?format=json"
@@ -26,7 +26,7 @@ with open("data/priceData.json", "r") as file:
     file.close()
 
 # Get current price data from the API and parse the JSON
-apiResponse = requests.post(apiURL, headers={"User-Agent": "FuelHook v2.3"})
+apiResponse = requests.post(apiURL, headers={"User-Agent": "FuelHook v2.3.1"})
 priceDataAPI = json.loads(apiResponse.text)
 
 # Get the last updated time from the API
