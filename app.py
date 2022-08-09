@@ -56,7 +56,7 @@ for type in fuelTypes:
     # Print the price and location data
     print("\nBest " + str(type) + " price: ", price, "\nLocated at: ", str(loc))
 
-    # Send alert on price change
+    # Add alert to content on price change
     if price != float(priceDataFile[type]):
         if price > float(priceDataFile[type]):
             content += ":arrow_up:\t\t"
@@ -72,6 +72,9 @@ for type in fuelTypes:
             + "\n\n"
         )
 
+    # Add price from API to price data file
+    priceDataFile[type] = price
+
 # Post any price changes to webhook
 if content != "":
     content += (
@@ -80,8 +83,6 @@ if content != "":
         + "\n@everyone"
     )
     requests.post(webhookURL, data={"content": content})
-
-    priceDataFile[type] = price
 
 # Write the current price to the JSON file
 with open("data/priceData.json", "w") as file:
