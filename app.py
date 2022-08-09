@@ -26,7 +26,7 @@ with open("data/priceData.json", "r") as file:
     file.close()
 
 # Get current price data from the API and parse the JSON
-apiResponse = requests.post(apiURL, headers={"User-Agent": "FuelHook v2.3.1"})
+apiResponse = requests.post(apiURL, headers={"User-Agent": "FuelHook v2.3.2"})
 priceDataAPI = json.loads(apiResponse.text)
 
 # Get the last updated time from the API
@@ -71,6 +71,15 @@ for type in fuelTypes:
             + str(loc)
             + "\n\n"
         )
+
+# Post any price changes to webhook
+if content != "":
+    content += (
+        "Prices are correct as of "
+        + strftime("%a %d %b %Y %H:%M:%S", localtime(lastUpdated))
+        + "\n@everyone"
+    )
+    requests.post(webhookURL, data={"content": content})
 
     priceDataFile[type] = price
 
