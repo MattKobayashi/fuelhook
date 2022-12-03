@@ -16,7 +16,7 @@ env:
 
 
 jobs:
-  build:
+  build-fuelhook:
 
     runs-on: ubuntu-latest
     permissions:
