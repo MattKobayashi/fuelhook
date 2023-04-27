@@ -1,23 +1,23 @@
 ---
 services:
   fuelhook:
-      build:
-        context: .
-        dockerfile: Dockerfile
-      image: fuelhook
-      container_name: fuelhook
-      restart: unless-stopped
-      environment:
-        - "TZ=UTC"
-        - "REGION=All"
-        - "FUEL_TYPES=[\"E10\", \"U91\", \"U95\", \"U98\", \"Diesel\", \"LPG\"]"
-        - "WEBHOOK_TYPE="
-        - "WEBHOOK_URL="
-        - "TELEGRAM_CHAT_ID="
-      volumes:
-        - type: volume
-          source: fuelhook_data
-          target: /opt/fuelhook/data
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fuelhook
+    container_name: fuelhook
+    restart: unless-stopped
+    environment:
+      - "TZ=UTC"
+      - "REGION=All"
+      - "FUEL_TYPES=[\"E10\", \"U91\", \"U95\", \"U98\", \"Diesel\", \"LPG\"]"
+      - "WEBHOOK_TYPE="
+      - "WEBHOOK_URL="
+      - "TELEGRAM_CHAT_ID="
+    volumes:
+      - type: volume
+        source: fuelhook_data
+        target: /opt/fuelhook/data
 
 volumes:
   fuelhook_data:
