@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import requests
 import json
 import os
@@ -26,7 +28,7 @@ with open("data/priceData.json", "r") as file:
     file.close()
 
 # Get current price data from the API and parse the JSON
-apiResponse = requests.post(apiURL, headers={"User-Agent": "FuelHook v2.3.2"})
+apiResponse = requests.post(apiURL, headers={"User-Agent": "FuelHook v2.4.0"})
 priceDataAPI = json.loads(apiResponse.text)
 
 # Get the last updated time from the API
@@ -59,18 +61,35 @@ for type in fuelTypes:
     # Add alert to content on price change
     if price != float(priceDataFile[type]):
         if price > float(priceDataFile[type]):
-            content += ":arrow_up:\t\t"
+            if os.environ.get("WEBHOOK_TYPE") == "Discord":
+                content += ":arrow_up:\t\t"
+            if os.environ.get("WEBHOOK_TYPE") == "Telegram":
+                content += "⬆️\t\t"
         else:
-            content += ":arrow_down:\t\t"
-        content += (
-            ":fuelpump: "
-            + str(type)
-            + "\t\t:dollar: "
-            + str(price)
-            + "\t\t:map: "
-            + str(loc)
-            + "\n\n"
-        )
+            if os.environ.get("WEBHOOK_TYPE") == "Discord":
+                content += ":arrow_down:\t\t"
+            if os.environ.get("WEBHOOK_TYPE") == "Telegram":
+                content += "⬇️\t\t"
+        if os.environ.get("WEBHOOK_TYPE") == "Discord":
+            content += (
+                ":fuelpump: "
+                + str(type)
+                + "\t\t:dollar: "
+                + str(price)
+                + "\t\t:map: "
+                + str(loc)
+                + "\n\n"
+            )
+        if os.environ.get("WEBHOOK_TYPE") == "Telegram":
+            content += (
+                "⛽️ "
+                + str(type)
+                + "\t\t💵 "
+                + str(price)
+                + "\t\t🗺️ "
+                + str(loc)
+                + "\n\n"
+            )
 
     # Add price from API to price data file
     priceDataFile[type] = price
@@ -80,9 +99,15 @@ if content != "":
     content += (
         "Prices are correct as of "
         + strftime("%a %d %b %Y %H:%M:%S", localtime(lastUpdated))
-        + "\n@everyone"
     )
-    requests.post(webhookURL, data={"content": content})
+    if os.environ.get("WEBHOOK_TYPE") == "Discord":
+        content += "\n@everyone"
+        requests.post(webhookURL, data={"content": content})
+    if os.environ.get("WEBHOOK_TYPE") == "Telegram":
+        requests.post(webhookURL, params={
+            "chat_id": int(os.environ.get("TELEGRAM_CHAT_ID")),
+            "text": str(content)
+            })
 
 # Write the current price to the JSON file
 with open("data/priceData.json", "w") as file:
