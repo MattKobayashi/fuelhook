@@ -73,6 +73,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./${{ env.IMAGE_NAME }}
+          context: .
           push: ${{ github.event_name == 'push' || github.event_name == 'schedule' }}
           tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:latest
