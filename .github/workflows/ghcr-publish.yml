@@ -61,7 +61,8 @@ jobs:
       - name: Log into registry ${{ env.REGISTRY }}
         if: |
           github.event_name == 'push' ||
-          github.event_name == 'schedule'
+          github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch'
         uses: docker/login-action@v3.3.0
         with:
           registry: ${{ env.REGISTRY }}
@@ -80,7 +81,6 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
         uses: docker/build-push-action@v6.7.0
-        if: ${{ github.ref_name == 'main' || github.head_ref == matrix.container }}
         with:
           context: ./${{ matrix.container }}
           push: ${{ github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
