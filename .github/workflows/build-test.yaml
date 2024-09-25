@@ -17,9 +17,6 @@ jobs:
           fuelhook
         ]
     uses: ./.github/workflows/create-runner.yaml
-    with:
-      runner-name: ${{ matrix.runner-name }}
-      workdir: /tmp/actions-runners/${{ matrix.runner-name }}
   build-test:
     name: Build and test container image
     runs-on: self-hosted
