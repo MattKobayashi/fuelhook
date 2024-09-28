@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.2](https://github.com/MattKobayashi/fuelhook/compare/v2.5.1...v2.5.2) (2024-09-28)
+
+
+### Bug Fixes
+
+* Generate image tags properly ([#41](https://github.com/MattKobayashi/fuelhook/issues/41)) ([8f76793](https://github.com/MattKobayashi/fuelhook/commit/8f76793bb1a2a31e2a07dfd4c23ea96da63a9e41))
+
 ## [2.5.1](https://github.com/MattKobayashi/fuelhook/compare/v2.5.0...v2.5.1) (2024-09-28)
 
 
