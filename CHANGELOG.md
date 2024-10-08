@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.3](https://github.com/MattKobayashi/fuelhook/compare/v2.5.2...v2.5.3) (2024-10-08)
+
+
+### Bug Fixes
+
+* Install `supercronic` from Alpine repo ([#53](https://github.com/MattKobayashi/fuelhook/issues/53)) ([ba36189](https://github.com/MattKobayashi/fuelhook/commit/ba36189dd55647b5240f75f5904e05053cf7b353))
+
 ## [2.5.2](https://github.com/MattKobayashi/fuelhook/compare/v2.5.1...v2.5.2) (2024-09-28)
 
 
