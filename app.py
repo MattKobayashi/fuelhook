@@ -1,117 +1,146 @@
-#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#     "requests==2.32.3",
+# ]
+# ///
 
-import requests
+#!/usr/bin/env python3
 import json
 import os
 import copy
 from time import strftime, localtime
+import requests
 
 # Define fuel types to check
-fuelTypes = json.loads(os.environ.get("FUEL_TYPES"))
+FUEL_TYPES = json.loads(os.environ.get("FUEL_TYPES"))
 
 # Set the URL for the ProjectZeroThree API
-apiURL = "https://projectzerothree.info/api.php?format=json"
+API_URL = "https://projectzerothree.info/api.php?format=json"
 
 # Create price data JSON file if it doesn't already exist
 if (
     not os.path.isfile("data/priceData.json")
     or os.path.getsize("data/priceData.json") == 0
 ):
-    blankPrice = {"E10": 0, "U91": 0, "U95": 0, "U98": 0, "Diesel": 0, "LPG": 0}
-    with open("data/priceData.json", "w") as file:
-        json.dump(blankPrice, file)
+    BLANK_PRICE = {
+        "E10": 0,
+        "U91": 0,
+        "U95": 0,
+        "U98": 0,
+        "Diesel": 0,
+        "LPG": 0
+    }
+    with open("data/priceData.json", "w", encoding="utf-8") as file:
+        json.dump(BLANK_PRICE, file)
         file.close()
 
 # Read last prices from JSON file
-with open("data/priceData.json", "r") as file:
-    priceDataFile = json.load(file)
+with open("data/priceData.json", "r", encoding="utf-8") as file:
+    PRICE_DATA_FILE = json.load(file)
     file.close()
 
 # Get current price data from the API and parse the JSON
-apiResponse = requests.post(apiURL, headers={"User-Agent": "FuelHook v2.4.0"})
-priceDataAPI = json.loads(apiResponse.text)
+API_RESPONSE = requests.post(API_URL, headers={"User-Agent": "FuelHook v2.4.0"})
+PRICE_DATA_API = json.loads(API_RESPONSE.text)
 
 # Get the last updated time from the API
-lastUpdated = int(priceDataAPI["updated"])
+LAST_UPDATED = int(PRICE_DATA_API["updated"])
 
 # Create list of dicts with fuel price data from API
-regionPref = str(os.environ.get("REGION"))
-regionPrices = [
-    copy.deepcopy(d) for d in priceDataAPI["regions"] if d["region"] == regionPref
+REGION_PREF = str(os.environ.get("REGION"))
+REGION_PRICES = [
+    copy.deepcopy(d) for d in PRICE_DATA_API["regions"] if d["region"] == REGION_PREF
 ][0]["prices"]
 
 # Set the webhook URL and initialise content variable
-webhookURL = str(os.environ.get("WEBHOOK_URL"))
-content = ""
+WEBHOOK_URL = str(os.environ.get("WEBHOOK_URL"))
+CONTENT = ""
 
 # Iterate on fuel types
-for type in fuelTypes:
+for FUEL_TYPE in FUEL_TYPES:
 
     # Set price and location variables
-    price = float(next(item["price"] for item in regionPrices if item["type"] == type))
-    loc = str(
-        next(item["suburb"] for item in regionPrices if item["type"] == type)
+    PRICE = float(next(item["price"] for item in REGION_PRICES if item["type"] == FUEL_TYPE))
+    LOC = str(
+        next(item["suburb"] for item in REGION_PRICES if item["type"] == FUEL_TYPE)
         + ", "
-        + next(item["state"] for item in regionPrices if item["type"] == type)
+        + next(item["state"] for item in REGION_PRICES if item["type"] == FUEL_TYPE)
     )
 
     # Print the price and location data
-    print("\nBest " + str(type) + " price: ", price, "\nLocated at: ", str(loc))
+    print(
+        "\nBest " + str(FUEL_TYPE) + " price: ",
+        PRICE,
+        "\nLocated at: ",
+        str(LOC)
+    )
 
     # Add alert to content on price change
-    if price != float(priceDataFile[type]):
-        if price > float(priceDataFile[type]):
+    if PRICE != float(PRICE_DATA_FILE[FUEL_TYPE]):
+        if PRICE > float(PRICE_DATA_FILE[FUEL_TYPE]):
             if os.environ.get("WEBHOOK_TYPE") == "Discord":
-                content += ":arrow_up:\t\t"
+                CONTENT += ":arrow_up:\t\t"
             if os.environ.get("WEBHOOK_TYPE") == "Telegram":
-                content += "⬆️\t\t"
+                CONTENT += "⬆️\t\t"
         else:
             if os.environ.get("WEBHOOK_TYPE") == "Discord":
-                content += ":arrow_down:\t\t"
+                CONTENT += ":arrow_down:\t\t"
             if os.environ.get("WEBHOOK_TYPE") == "Telegram":
-                content += "⬇️\t\t"
+                CONTENT += "⬇️\t\t"
         if os.environ.get("WEBHOOK_TYPE") == "Discord":
-            content += (
+            CONTENT += (
                 ":fuelpump: "
-                + str(type)
+                + str(FUEL_TYPE)
                 + "\t\t:dollar: "
-                + str(price)
+                + str(PRICE)
                 + "\t\t:map: "
-                + str(loc)
+                + str(LOC)
                 + "\n\n"
             )
         if os.environ.get("WEBHOOK_TYPE") == "Telegram":
-            content += (
+            CONTENT += (
                 "⛽️ "
-                + str(type)
+                + str(FUEL_TYPE)
                 + "\t\t💵 "
-                + str(price)
+                + str(PRICE)
                 + "\t\t🗺️ "
-                + str(loc)
+                + str(LOC)
                 + "\n\n"
             )
 
     # Add price from API to price data file
-    priceDataFile[type] = price
+    PRICE_DATA_FILE[FUEL_TYPE] = PRICE
 
 # Post any price changes to webhook
-if content != "":
-    content += (
+if CONTENT != "":
+    CONTENT += (
         "Prices are correct as of "
-        + strftime("%a %d %b %Y %H:%M:%S", localtime(lastUpdated))
+        + strftime(
+            "%a %d %b %Y %H:%M:%S",
+            localtime(LAST_UPDATED)
+        )
     )
     if os.environ.get("WEBHOOK_TYPE") == "Discord":
-        content += "\n@everyone"
-        requests.post(webhookURL, data={"content": content})
+        CONTENT += "\n@everyone"
+        requests.post(
+            WEBHOOK_URL,
+            data={
+                "content": CONTENT
+            }
+        )
     if os.environ.get("WEBHOOK_TYPE") == "Telegram":
-        requests.post(webhookURL, params={
-            "chat_id": int(os.environ.get("TELEGRAM_CHAT_ID")),
-            "text": str(content)
-            })
+        requests.post(
+            WEBHOOK_URL,
+            params={
+                "chat_id": int(os.environ.get("TELEGRAM_CHAT_ID")),
+                "text": str(CONTENT)
+            }
+        )
 
 # Write the current price to the JSON file
-with open("data/priceData.json", "w") as file:
-    json.dump(priceDataFile, file)
+with open("data/priceData.json", "w", encoding="utf-8") as file:
+    json.dump(PRICE_DATA_FILE, file)
     file.close()
 
 # Print script completion to log
