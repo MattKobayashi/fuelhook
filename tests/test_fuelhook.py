@@ -91,21 +91,32 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
         ]
     })
     
+    # Expected blank price data structure (same as in main.py)
+    expected_blank_price = {
+        "E10": 0,
+        "U91": 0,
+        "U95": 0,
+        "U98": 0,
+        "Diesel": 0,
+        "LPG": 0
+    }
+    
     # Execute the main script's file creation logic
     with patch.dict('os.environ', {'FUEL_TYPES': '[]', 'REGION': '', 'WEBHOOK_URL': ''}):
         with patch('requests.post', return_value=mock_api_response):  # Mock the API call with the proper response
             try:
-                # We can't import main directly, so simulate the file creation logic
-                from main import BLANK_PRICE  # This will execute main.py up to this point
+                # Instead of importing BLANK_PRICE, we'll import PRICE_DATA_FILE which is a global
+                # The initialization will have already happened in the script.
+                from main import PRICE_DATA_FILE  # This will execute main.py
                 
                 # Check if the file was opened for writing
                 has_write_calls = any("data/priceData.json" in str(call) and "w" in str(call) 
                                      for call in mock_file.call_args_list)
                 assert has_write_calls, "File should have been opened for writing"
                 
-                # Verify that the contents written were the BLANK_PRICE
-                assert '"E10": 0' in file_contents, "File contents should include BLANK_PRICE data"
-                assert '"U91": 0' in file_contents, "File contents should include BLANK_PRICE data"
+                # Verify that the contents written match our expected blank price structure
+                for fuel_type in expected_blank_price:
+                    assert f'"{fuel_type}": 0' in file_contents, f"File contents should include {fuel_type} data initialized to 0"
                 
             except Exception as e:
                 pytest.fail(f"Test failed with exception: {str(e)}")
