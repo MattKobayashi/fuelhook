@@ -27,21 +27,16 @@ def test_environment_variables():
 @patch('os.path.isfile')
 @patch('os.path.getsize')
 @patch('json.dump')
-@patch('builtins.open')  # Remove new_callable=mock_open
-def test_price_data_file_creation(mock_open, mock_json_dump, mock_getsize, mock_isfile):
+@patch('json.load')  # Add this to directly mock json.load
+@patch('builtins.open')
+def test_price_data_file_creation(mock_open, mock_json_load, mock_json_dump, mock_getsize, mock_isfile):
     """Test that the price data file is created if it doesn't exist."""
     # Setup mocks to indicate file doesn't exist
     mock_isfile.return_value = False
     mock_getsize.return_value = 0
     
-    # Set up mock_open to return different file objects for different operations
-    read_mock = mock_open()
-    read_mock.read.return_value = '{}'  # Return valid, empty JSON
-    
-    write_mock = mock_open()
-    
-    # Configure mock_open to return different mocks based on how it's called
-    mock_open.side_effect = lambda *args, **kwargs: read_mock if 'r' in args[1] else write_mock
+    # Set up mock to return an empty dictionary for json.load
+    mock_json_load.return_value = {}
     
     # Create a mock API response with proper JSON text
     mock_api_response = MagicMock()
@@ -74,36 +69,34 @@ def test_price_data_file_creation(mock_open, mock_json_dump, mock_getsize, mock_
                 # Import the module to trigger execution
                 import main
                 
-                # Check that open was called for writing
-                write_calls = [call for call in mock_open.call_args_list if call[0][1] == 'w']
-                assert any('data/priceData.json' in call[0][0] for call in write_calls), \
-                    "File should be opened for writing"
+                # Verify the file was opened for writing
+                mock_open.assert_any_call('data/priceData.json', 'w', encoding='utf-8')
                 
-                # Find the json.dump call for our blank price data
-                # We need to check calls to json.dump where the first argument matches our expected structure
+                # Find the calls to json.dump that write to our file
+                # We need to find dump calls where the structure matches our expected blank price
                 json_dump_calls = [
                     call for call in mock_json_dump.call_args_list 
                     if call[0] and len(call[0]) >= 1 and isinstance(call[0][0], dict)
                 ]
                 
-                # There should be at least one call to json.dump with a dictionary
-                assert len(json_dump_calls) > 0, "No json.dump calls with dictionary data found"
+                # There should be at least one call to json.dump
+                assert len(json_dump_calls) > 0, "No json.dump calls found"
                 
-                # Find the call that dumps the blank price structure
-                blank_price_calls = [
-                    call for call in json_dump_calls
-                    if all(fuel_type in call[0][0] and call[0][0][fuel_type] == 0 
-                           for fuel_type in expected_blank_price)
-                ]
+                # Find the call for our blank price structure
+                blank_price_calls = []
+                for dump_call in json_dump_calls:
+                    if all(fuel_type in dump_call[0][0] for fuel_type in expected_blank_price):
+                        if all(dump_call[0][0][fuel_type] == 0 for fuel_type in expected_blank_price):
+                            blank_price_calls.append(dump_call)
                 
-                # There should be at least one such call
+                # There should be at least one call that matches our blank price structure
                 assert len(blank_price_calls) > 0, "No json.dump calls with blank price data found"
                 
-                # The first argument to this call should match our expected blank price structure
-                dumped_data = blank_price_calls[0][0][0]
+                # Verify the first matching call has the correct structure
+                first_call = blank_price_calls[0]
                 for fuel_type in expected_blank_price:
-                    assert fuel_type in dumped_data, f"Dumped data missing fuel type {fuel_type}"
-                    assert dumped_data[fuel_type] == 0, f"Fuel type {fuel_type} not initialized to 0"
+                    assert fuel_type in first_call[0][0], f"Dumped data missing fuel type {fuel_type}"
+                    assert first_call[0][0][fuel_type] == 0, f"Fuel type {fuel_type} not initialized to 0"
                 
             except Exception as e:
                 pytest.fail(f"Test failed with exception: {str(e)}")
