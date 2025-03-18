@@ -1,7 +1,8 @@
 import os
 import json
-import pytest
 from unittest.mock import patch, mock_open, MagicMock
+import pytest
+
 
 @pytest.fixture
 def mock_price_data():
@@ -19,6 +20,7 @@ def mock_price_data():
         ]
     }
 
+
 @pytest.fixture
 def mock_stored_price_data():
     """Fixture for mock stored price data."""
@@ -31,6 +33,7 @@ def mock_stored_price_data():
         "LPG": 0
     }
 
+
 @patch('requests.post')
 def test_price_change_detection(mock_post, mock_price_data, mock_stored_price_data):
     """Test that price changes are correctly detected."""
@@ -38,7 +41,7 @@ def test_price_change_detection(mock_post, mock_price_data, mock_stored_price_da
     mock_response = MagicMock()
     mock_response.text = json.dumps(mock_price_data)
     mock_post.return_value = mock_response
-    
+
     # Setup environment and mocks
     with patch.dict('os.environ', {
         'FUEL_TYPES': '["E10"]', 
@@ -55,18 +58,19 @@ def test_price_change_detection(mock_post, mock_price_data, mock_stored_price_da
                         # Execute the script's logic
                         try:
                             from main import CONTENT, PRICE_DATA_FILE
-                            
+
                             # Check that a price change was detected (CONTENT should not be empty)
                             assert "arrow_down" in CONTENT  # Price dropped from 1.50 to 1.45
                             assert "E10" in CONTENT
                             assert "1.45" in CONTENT
                             assert "Bondi, NSW" in CONTENT
-                            
+
                             # Check that the new price was stored
                             assert PRICE_DATA_FILE["E10"] == 1.45
                         except Exception:
                             # The import might fail because we're patching, that's ok
                             pass
+
 
 @patch('requests.post')
 def test_webhook_posting(mock_post, mock_price_data, mock_stored_price_data):
@@ -74,10 +78,10 @@ def test_webhook_posting(mock_post, mock_price_data, mock_stored_price_data):
     # Setup mock API response
     api_mock_response = MagicMock()
     api_mock_response.text = json.dumps(mock_price_data)
-    
+
     # Setup mock webhook response
     webhook_mock_response = MagicMock()
-    
+
     # Configure mock_post to return different responses based on the URL
     def side_effect(*args, **kwargs):
         if args[0] == "https://projectzerothree.info/api.php?format=json":
@@ -85,9 +89,9 @@ def test_webhook_posting(mock_post, mock_price_data, mock_stored_price_data):
         elif args[0] == "https://example.com/webhook":
             return webhook_mock_response
         return MagicMock()
-    
+
     mock_post.side_effect = side_effect
-    
+
     # Setup environment and mocks for Discord webhook
     with patch.dict('os.environ', {
         'FUEL_TYPES': '["E10"]', 
@@ -102,12 +106,12 @@ def test_webhook_posting(mock_post, mock_price_data, mock_stored_price_data):
                         try:
                             # This will run the script and should trigger the webhook post
                             __import__('main')
-                            
+
                             # Check that a POST request was made to the webhook URL
                             # Find the call to the webhook URL
                             webhook_calls = [call for call in mock_post.call_args_list 
                                            if call[0][0] == "https://example.com/webhook"]
-                            
+
                             assert len(webhook_calls) == 1
                             # Check that the post included the content with price info
                             assert "content" in webhook_calls[0][1]["data"]

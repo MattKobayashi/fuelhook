@@ -1,0 +1,10 @@
+[project]
+name = "fuelhook"
+version = "2.5.3"
+description = "A 7-Elevel fuel price alert script"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pytest==8.3.5",
+    "requests==2.32.3",
+]

@@ -1,7 +1,8 @@
 import os
 import json
-import pytest
 from unittest.mock import patch, mock_open, MagicMock
+import pytest
+
 
 @pytest.fixture
 def mock_price_data():
@@ -18,6 +19,7 @@ def mock_price_data():
         ]
     }
 
+
 @pytest.fixture
 def mock_stored_price_data():
     """Fixture for mock stored price data."""
@@ -30,16 +32,17 @@ def mock_stored_price_data():
         "LPG": 0
     }
 
+
 @patch('requests.post')
 def test_telegram_webhook_posting(mock_post, mock_price_data, mock_stored_price_data):
     """Test that Telegram webhooks are posted correctly when prices change."""
     # Setup mock API response
     api_mock_response = MagicMock()
     api_mock_response.text = json.dumps(mock_price_data)
-    
+
     # Setup mock webhook response
     webhook_mock_response = MagicMock()
-    
+
     # Configure mock_post to return different responses based on the URL
     def side_effect(*args, **kwargs):
         if args[0] == "https://projectzerothree.info/api.php?format=json":
@@ -47,9 +50,9 @@ def test_telegram_webhook_posting(mock_post, mock_price_data, mock_stored_price_
         elif args[0] == "https://example.com/webhook":
             return webhook_mock_response
         return MagicMock()
-    
+
     mock_post.side_effect = side_effect
-    
+
     # Setup environment and mocks for Telegram webhook
     with patch.dict('os.environ', {
         'FUEL_TYPES': '["E10"]', 
@@ -65,12 +68,12 @@ def test_telegram_webhook_posting(mock_post, mock_price_data, mock_stored_price_
                         try:
                             # This will run the script and should trigger the webhook post
                             __import__('main')
-                            
+
                             # Check that a POST request was made to the webhook URL
                             # Find the call to the webhook URL
                             webhook_calls = [call for call in mock_post.call_args_list 
                                            if call[0][0] == "https://example.com/webhook"]
-                            
+
                             assert len(webhook_calls) == 1
                             # Check that the post included the params with chat_id and text
                             assert "params" in webhook_calls[0][1]
@@ -96,14 +99,14 @@ def test_no_webhook_on_unchanged_price(mock_post, mock_price_data):
         "Diesel": 0,
         "LPG": 0
     }
-    
+
     # Setup mock API response
     api_mock_response = MagicMock()
     api_mock_response.text = json.dumps(mock_price_data)
-    
+
     # Configure mock_post to return the API response
     mock_post.return_value = api_mock_response
-    
+
     # Setup environment and mocks
     with patch.dict('os.environ', {
         'FUEL_TYPES': '["E10"]', 
@@ -117,11 +120,11 @@ def test_no_webhook_on_unchanged_price(mock_post, mock_price_data):
                     with patch('json.dump'):
                         # Reset the mock to clear previous calls
                         mock_post.reset_mock()
-                        
+
                         try:
                             # Execute main - this should make the API request but not post to webhook
                             __import__('main')
-                            
+
                             # Check that only one POST was made (to the API, not to the webhook)
                             assert mock_post.call_count == 1
                             assert mock_post.call_args[0][0] == "https://projectzerothree.info/api.php?format=json"
