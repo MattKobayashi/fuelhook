@@ -2,5 +2,4 @@
 .DS_Store
 .aider*
 uv.lock
-.prettierrc
 __pycache__/
