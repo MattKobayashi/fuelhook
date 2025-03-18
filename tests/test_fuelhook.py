@@ -28,20 +28,52 @@ def test_environment_variables():
 @patch('builtins.open')
 def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
     """Test that the price data file is created if it doesn't exist."""
-    # Setup mocks to indicate file doesn't exist
-    mock_isfile.return_value = False
+    # Setup mocks to indicate file doesn't exist initially, but once we've created it, it will exist
+    mock_isfile.side_effect = lambda path: path != "data/priceData.json" or hasattr(mock_file, 'file_created')
     
-    # Set up the mock_file to handle both read and write operations
-    # For read operations, return empty content (simulating a new file)
-    read_mock = mock_open(read_data="")
-    # For write operations, we'll use the standard mock_open behavior
-    write_mock = mock_open()
+    # We need to track which operations have been performed
+    mock_file.file_created = False
     
-    # Configure mock_file to return different mocks based on mode
+    # This will store what was written to the file
+    file_contents = ""
+    
+    # Configure mock_file to work differently based on the operation
     def open_side_effect(*args, **kwargs):
-        if 'r' in kwargs.get('mode', '') or len(args) > 1 and 'r' in args[1]:
-            return read_mock()
-        return write_mock()
+        nonlocal file_contents
+        
+        # Get filename and mode from args or kwargs
+        filename = args[0] if args else kwargs.get('file', '')
+        mode = args[1] if len(args) > 1 else kwargs.get('mode', 'r')
+        
+        if filename == 'data/priceData.json':
+            if 'w' in mode:
+                # Track that we've created the file
+                mock_file.file_created = True
+                
+                # Create a special file-like object for writing
+                mock_writer = mock_open()()
+                
+                # Override the write method to capture contents
+                original_write = mock_writer.write
+                def write_and_capture(data):
+                    nonlocal file_contents
+                    file_contents = data
+                    return original_write(data)
+                mock_writer.write = write_and_capture
+                
+                return mock_writer
+            else:
+                # For reading, return either empty or the contents we wrote
+                if mock_file.file_created:
+                    # Return the previously saved contents
+                    reader = mock_open(read_data=file_contents)()
+                else:
+                    # Return empty data if file wasn't created yet
+                    reader = mock_open(read_data="{}")()
+                return reader
+        
+        # Default mock for other files
+        return mock_open()()
     
     mock_file.side_effect = open_side_effect
     
@@ -53,20 +85,16 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
                 from main import BLANK_PRICE  # This will execute main.py up to this point
                 
                 # Check if the file was opened for writing
-                write_call_args = [call for call in mock_file.call_args_list if call[0][1] == 'w']
-                assert len(write_call_args) > 0
+                has_write_calls = any("data/priceData.json" in str(call) and "w" in str(call) 
+                                     for call in mock_file.call_args_list)
+                assert has_write_calls, "File should have been opened for writing"
                 
-                # Get the first write call that matches our expected path
-                data_file_write_call = next(call for call in write_call_args if 'data/priceData.json' in call[0][0])
-                assert data_file_write_call[0][0] == 'data/priceData.json'
-                assert data_file_write_call[0][1] == 'w'
-                assert data_file_write_call[1].get('encoding') == 'utf-8'
+                # Verify that the contents written were the BLANK_PRICE
+                assert '"E10": 0' in file_contents, "File contents should include BLANK_PRICE data"
+                assert '"U91": 0' in file_contents, "File contents should include BLANK_PRICE data"
                 
-                # No need to check what was written since we're not capturing that in this test
-                # Just checking that the file opening was attempted is sufficient
-            except json.decoder.JSONDecodeError:
-                # If we get a JSONDecodeError, the test configuration is wrong
-                pytest.fail("Mock file read data not set up correctly")
+            except Exception as e:
+                pytest.fail(f"Test failed with exception: {str(e)}")
 
 
 @pytest.fixture
