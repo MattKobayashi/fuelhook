@@ -77,9 +77,23 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
     
     mock_file.side_effect = open_side_effect
     
+    # Create a mock API response with proper JSON text
+    mock_api_response = MagicMock()
+    mock_api_response.text = json.dumps({
+        "updated": "1633939200",
+        "regions": [
+            {
+                "region": "",
+                "prices": [
+                    {"type": "E10", "price": "1.45", "suburb": "Test", "state": "TEST"}
+                ]
+            }
+        ]
+    })
+    
     # Execute the main script's file creation logic
     with patch.dict('os.environ', {'FUEL_TYPES': '[]', 'REGION': '', 'WEBHOOK_URL': ''}):
-        with patch('requests.post'):  # Mock the API call
+        with patch('requests.post', return_value=mock_api_response):  # Mock the API call with the proper response
             try:
                 # We can't import main directly, so simulate the file creation logic
                 from main import BLANK_PRICE  # This will execute main.py up to this point
