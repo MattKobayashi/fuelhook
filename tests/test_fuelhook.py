@@ -1,7 +1,8 @@
 import os
 import json
-import pytest
 from unittest.mock import patch, mock_open, MagicMock
+import pytest
+
 
 # Since main.py is a script and not a module, we'll test functions by importing them
 # We'll need to patch environment variables and file operations
@@ -21,6 +22,7 @@ def test_environment_variables():
         assert os.environ.get('WEBHOOK_URL') == 'https://example.com/webhook'
         assert os.environ.get('WEBHOOK_TYPE') == 'Discord'
 
+
 @patch('os.path.isfile')
 @patch('os.path.getsize')
 @patch('builtins.open', new_callable=mock_open)
@@ -28,16 +30,16 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
     """Test that the price data file is created if it doesn't exist."""
     # Setup mocks to indicate file doesn't exist
     mock_isfile.return_value = False
-    
+
     # Execute the main script's file creation logic
     with patch.dict('os.environ', {'FUEL_TYPES': '[]', 'REGION': '', 'WEBHOOK_URL': ''}):
         with patch('requests.post'):  # Mock the API call
             # We can't import main directly, so simulate the file creation logic
             from main import BLANK_PRICE  # This will execute main.py up to this point
-            
+
             # Check if the file was opened for writing
             mock_file.assert_called_with('data/priceData.json', 'w', encoding='utf-8')
-            
+
             # Check if the correct blank price data was written
             handle = mock_file()
             expected_data = json.dumps(BLANK_PRICE)
@@ -45,9 +47,10 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
             written_data = ''
             for call in handle.write.call_args_list:
                 written_data += call[0][0]
-            
+
             # Compare json data (ignoring whitespace differences)
             assert json.loads(written_data) == json.loads(expected_data)
+
 
 @pytest.fixture
 def mock_api_response():
@@ -75,6 +78,7 @@ def mock_api_response():
         ]
     }
 
+
 @patch('requests.post')
 def test_api_request(mock_post, mock_api_response):
     """Test that the API request is made correctly."""
@@ -82,7 +86,7 @@ def test_api_request(mock_post, mock_api_response):
     mock_response = MagicMock()
     mock_response.text = json.dumps(mock_api_response)
     mock_post.return_value = mock_response
-    
+
     # Import main to execute the API request
     with patch.dict('os.environ', {
         'FUEL_TYPES': '["E10"]', 
@@ -95,7 +99,7 @@ def test_api_request(mock_post, mock_api_response):
                     # This will execute the script, including the API request
                     try:
                         from main import API_RESPONSE
-                        
+
                         # Check that the request was made with the correct URL and headers
                         mock_post.assert_called_once_with(
                             "https://projectzerothree.info/api.php?format=json",
