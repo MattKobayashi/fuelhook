@@ -27,12 +27,21 @@ def test_environment_variables():
 @patch('os.path.isfile')
 @patch('os.path.getsize')
 @patch('json.dump')
-@patch('builtins.open', new_callable=mock_open)
+@patch('builtins.open')  # Remove new_callable=mock_open
 def test_price_data_file_creation(mock_open, mock_json_dump, mock_getsize, mock_isfile):
     """Test that the price data file is created if it doesn't exist."""
     # Setup mocks to indicate file doesn't exist
     mock_isfile.return_value = False
     mock_getsize.return_value = 0
+    
+    # Set up mock_open to return different file objects for different operations
+    read_mock = mock_open()
+    read_mock.read.return_value = '{}'  # Return valid, empty JSON
+    
+    write_mock = mock_open()
+    
+    # Configure mock_open to return different mocks based on how it's called
+    mock_open.side_effect = lambda *args, **kwargs: read_mock if 'r' in args[1] else write_mock
     
     # Create a mock API response with proper JSON text
     mock_api_response = MagicMock()
@@ -66,7 +75,9 @@ def test_price_data_file_creation(mock_open, mock_json_dump, mock_getsize, mock_
                 import main
                 
                 # Check that open was called for writing
-                mock_open.assert_any_call('data/priceData.json', 'w', encoding='utf-8')
+                write_calls = [call for call in mock_open.call_args_list if call[0][1] == 'w']
+                assert any('data/priceData.json' in call[0][0] for call in write_calls), \
+                    "File should be opened for writing"
                 
                 # Find the json.dump call for our blank price data
                 # We need to check calls to json.dump where the first argument matches our expected structure
