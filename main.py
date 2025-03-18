@@ -41,7 +41,7 @@ with open("data/priceData.json", "r", encoding="utf-8") as file:
     file.close()
 
 # Get current price data from the API and parse the JSON
-API_RESPONSE = requests.post(API_URL, headers={"User-Agent": "FuelHook v2.4.0"})
+API_RESPONSE = requests.post(API_URL, headers={"User-Agent": "FuelHook v2.4.0"}, timeout=5)
 PRICE_DATA_API = json.loads(API_RESPONSE.text)
 
 # Get the last updated time from the API
@@ -50,7 +50,9 @@ LAST_UPDATED = int(PRICE_DATA_API["updated"])
 # Create list of dicts with fuel price data from API
 REGION_PREF = str(os.environ.get("REGION"))
 REGION_PRICES = [
-    copy.deepcopy(d) for d in PRICE_DATA_API["regions"] if d["region"] == REGION_PREF
+    copy.deepcopy(d)
+    for d in PRICE_DATA_API["regions"]
+    if d["region"] == REGION_PREF
 ][0]["prices"]
 
 # Set the webhook URL and initialise content variable
@@ -127,7 +129,8 @@ if CONTENT != "":
             WEBHOOK_URL,
             data={
                 "content": CONTENT
-            }
+            },
+            timeout=5
         )
     if os.environ.get("WEBHOOK_TYPE") == "Telegram":
         requests.post(
@@ -135,7 +138,7 @@ if CONTENT != "":
             params={
                 "chat_id": int(os.environ.get("TELEGRAM_CHAT_ID")),
                 "text": str(CONTENT)
-            }
+            }, timeout=5
         )
 
 # Write the current price to the JSON file
