@@ -35,7 +35,7 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
     mock_file.file_created = False
     
     # This will store what was written to the file
-    file_contents = ""
+    file_contents = {}
     
     # Configure mock_file to work differently based on the operation
     def open_side_effect(*args, **kwargs):
@@ -50,23 +50,15 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
                 # Track that we've created the file
                 mock_file.file_created = True
                 
-                # Create a special file-like object for writing
+                # Create a mock file object
                 mock_writer = mock_open()()
-                
-                # Override the write method to capture contents
-                original_write = mock_writer.write
-                def write_and_capture(data):
-                    nonlocal file_contents
-                    file_contents = data
-                    return original_write(data)
-                mock_writer.write = write_and_capture
-                
                 return mock_writer
             else:
-                # For reading, return either empty or the contents we wrote
-                if mock_file.file_created:
-                    # Return the previously saved contents
-                    reader = mock_open(read_data=file_contents)()
+                # For reading, return either the contents we wrote or empty
+                if mock_file.file_created and file_contents:
+                    # Create readable content from our captured data
+                    read_data = json.dumps(file_contents)
+                    reader = mock_open(read_data=read_data)()
                 else:
                     # Return empty data if file wasn't created yet
                     reader = mock_open(read_data="{}")()
@@ -101,25 +93,35 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
         "LPG": 0
     }
     
+    # Capture the data passed to json.dump
+    def capture_json_dump(data, file_obj):
+        nonlocal file_contents
+        file_contents = data
+        # Call the original json.dump to keep the code running
+        original_json_dump(data, file_obj)
+    
+    original_json_dump = json.dump
+    
     # Execute the main script's file creation logic
     with patch.dict('os.environ', {'FUEL_TYPES': '[]', 'REGION': '', 'WEBHOOK_URL': ''}):
-        with patch('requests.post', return_value=mock_api_response):  # Mock the API call with the proper response
-            try:
-                # Instead of importing BLANK_PRICE, we'll import PRICE_DATA_FILE which is a global
-                # The initialization will have already happened in the script.
-                from main import PRICE_DATA_FILE  # This will execute main.py
-                
-                # Check if the file was opened for writing
-                has_write_calls = any("data/priceData.json" in str(call) and "w" in str(call) 
-                                     for call in mock_file.call_args_list)
-                assert has_write_calls, "File should have been opened for writing"
-                
-                # Verify that the contents written match our expected blank price structure
-                for fuel_type in expected_blank_price:
-                    assert f'"{fuel_type}": 0' in file_contents, f"File contents should include {fuel_type} data initialized to 0"
-                
-            except Exception as e:
-                pytest.fail(f"Test failed with exception: {str(e)}")
+        with patch('requests.post', return_value=mock_api_response):
+            with patch('json.dump', side_effect=capture_json_dump):
+                try:
+                    # Import PRICE_DATA_FILE which will execute the script
+                    from main import PRICE_DATA_FILE
+                    
+                    # Check if the file was opened for writing
+                    has_write_calls = any("data/priceData.json" in str(call) and "w" in str(call) 
+                                         for call in mock_file.call_args_list)
+                    assert has_write_calls, "File should have been opened for writing"
+                    
+                    # For each fuel type in our expected structure, verify it exists in the actual data
+                    for fuel_type in expected_blank_price:
+                        assert fuel_type in file_contents, f"File contents should include {fuel_type}"
+                        assert file_contents[fuel_type] == 0, f"{fuel_type} should be initialized to 0"
+                    
+                except Exception as e:
+                    pytest.fail(f"Test failed with exception: {str(e)}")
 
 
 @pytest.fixture
