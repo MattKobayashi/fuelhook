@@ -39,8 +39,6 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
     
     # Configure mock_file to work differently based on the operation
     def open_side_effect(*args, **kwargs):
-        nonlocal file_contents
-        
         # Get filename and mode from args or kwargs
         filename = args[0] if args else kwargs.get('file', '')
         mode = args[1] if len(args) > 1 else kwargs.get('mode', 'r')
@@ -50,9 +48,9 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
                 # Track that we've created the file
                 mock_file.file_created = True
                 
-                # Create a mock file object
-                mock_writer = mock_open()()
-                return mock_writer
+                # Create a special mock for the file object that will capture json.dump data
+                file_mock = mock_open()()
+                return file_mock
             else:
                 # For reading, return either the contents we wrote or empty
                 if mock_file.file_created and file_contents:
@@ -93,35 +91,42 @@ def test_price_data_file_creation(mock_file, mock_getsize, mock_isfile):
         "LPG": 0
     }
     
-    # Capture the data passed to json.dump
-    def capture_json_dump(data, file_obj):
-        nonlocal file_contents
-        file_contents = data
-        # Call the original json.dump to keep the code running
-        original_json_dump(data, file_obj)
+    # Create a simple module-level mock for json.dump to directly set file_contents
+    # This is a simpler approach than using side_effect
+    original_dump = json.dump
     
-    original_json_dump = json.dump
+    def mock_json_dump(data, fp, *args, **kwargs):
+        nonlocal file_contents
+        # If this is a write to our target file, store the data
+        if str(fp).find('data/priceData.json') != -1:
+            file_contents = data
     
     # Execute the main script's file creation logic
     with patch.dict('os.environ', {'FUEL_TYPES': '[]', 'REGION': '', 'WEBHOOK_URL': ''}):
         with patch('requests.post', return_value=mock_api_response):
-            with patch('json.dump', side_effect=capture_json_dump):
-                try:
-                    # Import PRICE_DATA_FILE which will execute the script
-                    from main import PRICE_DATA_FILE
-                    
-                    # Check if the file was opened for writing
-                    has_write_calls = any("data/priceData.json" in str(call) and "w" in str(call) 
-                                         for call in mock_file.call_args_list)
-                    assert has_write_calls, "File should have been opened for writing"
-                    
-                    # For each fuel type in our expected structure, verify it exists in the actual data
-                    for fuel_type in expected_blank_price:
-                        assert fuel_type in file_contents, f"File contents should include {fuel_type}"
-                        assert file_contents[fuel_type] == 0, f"{fuel_type} should be initialized to 0"
-                    
-                except Exception as e:
-                    pytest.fail(f"Test failed with exception: {str(e)}")
+            # Use a simpler approach to patch json.dump
+            json.dump = mock_json_dump
+            try:
+                # Import PRICE_DATA_FILE which will execute the script
+                from main import PRICE_DATA_FILE
+                
+                # Check if the file was opened for writing
+                has_write_calls = any("data/priceData.json" in str(call) and "w" in str(call) 
+                                     for call in mock_file.call_args_list)
+                assert has_write_calls, "File should have been opened for writing"
+                
+                # For each fuel type in our expected structure, verify it exists in the actual data
+                for fuel_type in expected_blank_price:
+                    assert fuel_type in file_contents, f"File contents should include {fuel_type}"
+                    assert file_contents[fuel_type] == 0, f"{fuel_type} should be initialized to 0"
+                
+            except Exception as e:
+                # Restore json.dump
+                json.dump = original_dump
+                pytest.fail(f"Test failed with exception: {str(e)}")
+            finally:
+                # Restore json.dump in case it wasn't restored due to an exception
+                json.dump = original_dump
 
 
 @pytest.fixture
