@@ -1,17 +1,15 @@
-FROM python:3.13.2-alpine3.20@sha256:e885b40c1ed9f3134030e99a27bd61e98e376bf6d6709cccfb3c0aa6e856f56a
+FROM python:3.13.2-alpine3.21@sha256:323a717dc4a010fee21e3f1aac738ee10bb485de4e7593ce242b36ee48d6b352
 WORKDIR /opt/fuelhook
 RUN addgroup -S fuelhook && adduser -S fuelhook -G fuelhook \
     && mkdir -p data \
     && chown fuelhook:fuelhook data \
-    && apk --no-cache add supercronic tzdata
+    && apk --no-cache add supercronic tzdata uv
 USER fuelhook
-COPY fuelhook-cron ./crontab/fuelhook-cron
+COPY fuelhook-cron /opt/fuelhook/crontab/fuelhook-cron
 COPY main.py main.py
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
 ENV TZ=UTC
 ENV REGION=0
 ENV WEBHOOK_URL=
 VOLUME ["/opt/fuelhook/data"]
-ENTRYPOINT ["supercronic", "./crontab/fuelhook-cron"]
+ENTRYPOINT ["/usr/bin/supercronic", "/opt/fuelhook/crontab/fuelhook-cron"]
 LABEL org.opencontainers.image.authors="MattKobayashi <matthew@kobayashi.au>"

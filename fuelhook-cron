@@ -1,1 +1,1 @@
-0 */15 * * * * * python /opt/fuelhook/main.py
+0 */15 * * * * * uv run python3 -u /opt/fuelhook/main.py
