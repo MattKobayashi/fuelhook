@@ -22,7 +22,7 @@ jobs:
         run: |
           set -eux
           pipx install uv
-          uv run --dev python3 -m pytest tests/
+          uv run --dev python3 -m pytest -v tests/
   container:
     name: Container image
     runs-on: ubuntu-24.04
