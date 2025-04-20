@@ -62,7 +62,7 @@ jobs:
         run: |
           set -eux
           docker image rm --force ${{ steps.build.outputs.imageid }}
-name: Tests
+name: Test
 on:
   pull_request:
     branches:
