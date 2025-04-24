@@ -23,8 +23,8 @@ jobs:
           set -eux
           pipx install uv
           uv run --dev python3 -m pytest -v tests/
-  container:
-    name: Container image
+  image:
+    name: Image
     runs-on: ubuntu-24.04
     steps:
       # Checkout the repository
