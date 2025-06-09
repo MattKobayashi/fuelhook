@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.4](https://github.com/MattKobayashi/fuelhook/compare/v2.5.3...v2.5.4) (2025-06-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency requests to v2.32.4 ([#123](https://github.com/MattKobayashi/fuelhook/issues/123)) ([b9f00d2](https://github.com/MattKobayashi/fuelhook/commit/b9f00d217ad2f6331fc53414bdb7c6e7938fb522))
+
 ## [2.5.3](https://github.com/MattKobayashi/fuelhook/compare/v2.5.2...v2.5.3) (2024-10-08)
 
 
