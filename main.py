@@ -90,7 +90,7 @@ if CONTENT:
     )
 
     APPRISE.notify(
-        title="Fuel price update",
+        title="Fuel Price Change",
         body=CONTENT,
         notify_type=NotifyType.INFO,
     )
