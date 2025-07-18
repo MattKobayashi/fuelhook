@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/MattKobayashi/fuelhook/compare/v2.5.4...v3.0.0) (2025-07-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* use Apprise for notifications ([#136](https://github.com/MattKobayashi/fuelhook/issues/136))
+
+### Features
+
+* use Apprise for notifications ([#136](https://github.com/MattKobayashi/fuelhook/issues/136)) ([2caab7b](https://github.com/MattKobayashi/fuelhook/commit/2caab7bf6a758a04f4bc057f372972bbd29ede4d))
+
 ## [2.5.4](https://github.com/MattKobayashi/fuelhook/compare/v2.5.3...v2.5.4) (2025-06-09)
 
 
