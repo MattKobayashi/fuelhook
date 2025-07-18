@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.3](https://github.com/MattKobayashi/fuelhook/compare/v3.0.2...v3.0.3) (2025-07-18)
+
+
+### Bug Fixes
+
+* **main:** notification content spacing ([#142](https://github.com/MattKobayashi/fuelhook/issues/142)) ([cd6117e](https://github.com/MattKobayashi/fuelhook/commit/cd6117e48fa6499268ea5461bb9b623e2e2a9951))
+
 ## [3.0.2](https://github.com/MattKobayashi/fuelhook/compare/v3.0.1...v3.0.2) (2025-07-18)
 
 
