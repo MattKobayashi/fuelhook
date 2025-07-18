@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/MattKobayashi/fuelhook/compare/v3.0.0...v3.0.1) (2025-07-18)
+
+
+### Bug Fixes
+
+* remove old content switches ([#138](https://github.com/MattKobayashi/fuelhook/issues/138)) ([72256c8](https://github.com/MattKobayashi/fuelhook/commit/72256c81acfdc777c25d33c7afca7f2929373dc9))
+
 ## [3.0.0](https://github.com/MattKobayashi/fuelhook/compare/v2.5.4...v3.0.0) (2025-07-18)
 
 
