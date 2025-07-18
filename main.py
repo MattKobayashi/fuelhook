@@ -29,7 +29,9 @@ with open("data/priceData.json", "r", encoding="utf-8") as file:
     file.close()
 
 # Get current price data from the API and parse the JSON
-API_RESPONSE = requests.post(API_URL, headers={"User-Agent": "FuelHook v3"}, timeout=5)
+API_RESPONSE = requests.post(
+    API_URL, headers={"User-Agent": "FuelHook v3.0"}, timeout=5
+)
 PRICE_DATA_API = json.loads(API_RESPONSE.text)
 
 # Get the last updated time from the API
@@ -67,17 +69,11 @@ for FUEL_TYPE in FUEL_TYPES:
     # Add alert to content on price change
     if PRICE != float(PRICE_DATA_FILE[FUEL_TYPE]):
         if PRICE > float(PRICE_DATA_FILE[FUEL_TYPE]):
-            CONTENT += "⬆️\t\t"
+            CONTENT += "⬆️\t"
         else:
-            CONTENT += "⬇️\t\t"
+            CONTENT += "⬇️\t"
         CONTENT += (
-            "⛽️ "
-            + str(FUEL_TYPE)
-            + "\t\t💵 "
-            + str(PRICE)
-            + "\t\t🗺️ "
-            + str(LOC)
-            + "\n\n"
+            "⛽️ " + str(FUEL_TYPE) + " \t💵 " + str(PRICE) + " \t🗺️ " + str(LOC) + "\n\n"
         )
 
     # Add price from API to price data file
