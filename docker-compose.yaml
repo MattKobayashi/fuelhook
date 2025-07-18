@@ -7,7 +7,7 @@ services:
     container_name: fuelhook
     environment:
       - "APPRISE_URL="
-      - "FUEL_TYPES=[\"E10\", \"U91\", \"U95\", \"U98\", \"Diesel\", \"LPG\"]"
+      - 'FUEL_TYPES=["E10", "U91", "U95", "U98", "Diesel", "LPG"]'
       - "REGION=All"
       - "TZ=UTC"
     image: fuelhook
