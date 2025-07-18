@@ -14,8 +14,8 @@ RUN apk add --no-cache \
 
 WORKDIR /opt/fuelhook
 RUN addgroup -S fuelhook && adduser -S fuelhook -G fuelhook \
-    && mkdir -p data \
-    && chown fuelhook:fuelhook data
+    && chown -R fuelhook:fuelhook /opt/fuelhook \
+    && mkdir -p /opt/fuelhook/data
 USER fuelhook
 COPY fuelhook-cron /opt/fuelhook/crontab/fuelhook-cron
 COPY main.py pyproject.toml /opt/fuelhook/
