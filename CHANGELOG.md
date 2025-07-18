@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/MattKobayashi/fuelhook/compare/v3.0.1...v3.0.2) (2025-07-18)
+
+
+### Bug Fixes
+
+* **docker:** directory permissions ([#140](https://github.com/MattKobayashi/fuelhook/issues/140)) ([5617f98](https://github.com/MattKobayashi/fuelhook/commit/5617f982030f612e3e333364b7656fedb1b70b71))
+
 ## [3.0.1](https://github.com/MattKobayashi/fuelhook/compare/v3.0.0...v3.0.1) (2025-07-18)
 
 
