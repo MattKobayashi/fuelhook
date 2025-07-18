@@ -18,14 +18,7 @@ if (
     not os.path.isfile("data/priceData.json")
     or os.path.getsize("data/priceData.json") == 0
 ):
-    BLANK_PRICE = {
-        "E10": 0,
-        "U91": 0,
-        "U95": 0,
-        "U98": 0,
-        "Diesel": 0,
-        "LPG": 0
-    }
+    BLANK_PRICE = {"E10": 0, "U91": 0, "U95": 0, "U98": 0, "Diesel": 0, "LPG": 0}
     with open("data/priceData.json", "w", encoding="utf-8") as file:
         json.dump(BLANK_PRICE, file)
         file.close()
@@ -36,7 +29,9 @@ with open("data/priceData.json", "r", encoding="utf-8") as file:
     file.close()
 
 # Get current price data from the API and parse the JSON
-API_RESPONSE = requests.post(API_URL, headers={"User-Agent": "FuelHook v2.4.0"}, timeout=5)
+API_RESPONSE = requests.post(
+    API_URL, headers={"User-Agent": "FuelHook v2.4.0"}, timeout=5
+)
 PRICE_DATA_API = json.loads(API_RESPONSE.text)
 
 # Get the last updated time from the API
@@ -45,41 +40,23 @@ LAST_UPDATED = int(PRICE_DATA_API["updated"])
 # Create list of dicts with fuel price data from API
 REGION_PREF = str(os.environ.get("REGION"))
 REGION_PRICES = [
-    copy.deepcopy(d)
-    for d in PRICE_DATA_API["regions"]
-    if d["region"] == REGION_PREF
+    copy.deepcopy(d) for d in PRICE_DATA_API["regions"] if d["region"] == REGION_PREF
 ][0]["prices"]
 
 # Set the webhook URL and initialise content variable
-WEBHOOK_URL = str(os.environ.get("WEBHOOK_URL"))
+APPRISE_URL = str(os.environ.get("APPRISE_URL"))
 CONTENT = ""
 
-# ------------------------------------------------------------------
-#  Configure Apprise and register the user-provided webhook
-# ------------------------------------------------------------------
+# Configure Apprise and register the user-provided webhook
 APPRISE = apprise.Apprise()
-
-if os.environ.get("WEBHOOK_TYPE") == "Discord":
-    # https://discord.com/api/webhooks/<id>/<token>
-    APPRISE_URL = WEBHOOK_URL.replace(
-        "https://discord.com/api/webhooks/", "discord://"
-    )
-elif os.environ.get("WEBHOOK_TYPE") == "Telegram":
-    # https://api.telegram.org/bot<TOKEN>/sendMessage
-    token = WEBHOOK_URL.split("/bot")[1].split("/")[0]
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
-    APPRISE_URL = f"tgram://{token}/{chat_id}"
-else:
-    # assume the value is already a valid Apprise URL
-    APPRISE_URL = WEBHOOK_URL
-
 APPRISE.add(APPRISE_URL)
 
 # Iterate on fuel types
 for FUEL_TYPE in FUEL_TYPES:
-
     # Set price and location variables
-    PRICE = float(next(item["price"] for item in REGION_PRICES if item["type"] == FUEL_TYPE))
+    PRICE = float(
+        next(item["price"] for item in REGION_PRICES if item["type"] == FUEL_TYPE)
+    )
     LOC = str(
         next(item["suburb"] for item in REGION_PRICES if item["type"] == FUEL_TYPE)
         + ", "
@@ -87,12 +64,7 @@ for FUEL_TYPE in FUEL_TYPES:
     )
 
     # Print the price and location data
-    print(
-        "\nBest " + str(FUEL_TYPE) + " price: ",
-        PRICE,
-        "\nLocated at: ",
-        str(LOC)
-    )
+    print("\nBest " + str(FUEL_TYPE) + " price: ", PRICE, "\nLocated at: ", str(LOC))
 
     # Add alert to content on price change
     if PRICE != float(PRICE_DATA_FILE[FUEL_TYPE]):
@@ -132,12 +104,9 @@ for FUEL_TYPE in FUEL_TYPES:
 
 # Post any price changes through Apprise
 if CONTENT:
-    CONTENT += (
-        "Prices are correct as of "
-        + strftime("%a %d %b %Y %H:%M:%S", localtime(LAST_UPDATED))
+    CONTENT += "Prices are correct as of " + strftime(
+        "%a %d %b %Y %H:%M:%S", localtime(LAST_UPDATED)
     )
-    if os.environ.get("WEBHOOK_TYPE") == "Discord":
-        CONTENT += "\n@everyone"
 
     APPRISE.notify(
         title="Fuel price update",
