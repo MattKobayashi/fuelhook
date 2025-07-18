@@ -29,9 +29,7 @@ with open("data/priceData.json", "r", encoding="utf-8") as file:
     file.close()
 
 # Get current price data from the API and parse the JSON
-API_RESPONSE = requests.post(
-    API_URL, headers={"User-Agent": "FuelHook v2.4.0"}, timeout=5
-)
+API_RESPONSE = requests.post(API_URL, headers={"User-Agent": "FuelHook v3"}, timeout=5)
 PRICE_DATA_API = json.loads(API_RESPONSE.text)
 
 # Get the last updated time from the API
@@ -69,35 +67,18 @@ for FUEL_TYPE in FUEL_TYPES:
     # Add alert to content on price change
     if PRICE != float(PRICE_DATA_FILE[FUEL_TYPE]):
         if PRICE > float(PRICE_DATA_FILE[FUEL_TYPE]):
-            if os.environ.get("WEBHOOK_TYPE") == "Discord":
-                CONTENT += ":arrow_up:\t\t"
-            if os.environ.get("WEBHOOK_TYPE") == "Telegram":
-                CONTENT += "⬆️\t\t"
+            CONTENT += "⬆️\t\t"
         else:
-            if os.environ.get("WEBHOOK_TYPE") == "Discord":
-                CONTENT += ":arrow_down:\t\t"
-            if os.environ.get("WEBHOOK_TYPE") == "Telegram":
-                CONTENT += "⬇️\t\t"
-        if os.environ.get("WEBHOOK_TYPE") == "Discord":
-            CONTENT += (
-                ":fuelpump: "
-                + str(FUEL_TYPE)
-                + "\t\t:dollar: "
-                + str(PRICE)
-                + "\t\t:map: "
-                + str(LOC)
-                + "\n\n"
-            )
-        if os.environ.get("WEBHOOK_TYPE") == "Telegram":
-            CONTENT += (
-                "⛽️ "
-                + str(FUEL_TYPE)
-                + "\t\t💵 "
-                + str(PRICE)
-                + "\t\t🗺️ "
-                + str(LOC)
-                + "\n\n"
-            )
+            CONTENT += "⬇️\t\t"
+        CONTENT += (
+            "⛽️ "
+            + str(FUEL_TYPE)
+            + "\t\t💵 "
+            + str(PRICE)
+            + "\t\t🗺️ "
+            + str(LOC)
+            + "\n\n"
+        )
 
     # Add price from API to price data file
     PRICE_DATA_FILE[FUEL_TYPE] = PRICE
