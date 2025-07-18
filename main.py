@@ -4,6 +4,8 @@ import os
 import copy
 from time import strftime, localtime
 import requests
+import apprise
+from apprise import NotifyType
 
 # Define fuel types to check
 FUEL_TYPES = json.loads(os.environ.get("FUEL_TYPES"))
@@ -51,6 +53,27 @@ REGION_PRICES = [
 # Set the webhook URL and initialise content variable
 WEBHOOK_URL = str(os.environ.get("WEBHOOK_URL"))
 CONTENT = ""
+
+# ------------------------------------------------------------------
+#  Configure Apprise and register the user-provided webhook
+# ------------------------------------------------------------------
+APPRISE = apprise.Apprise()
+
+if os.environ.get("WEBHOOK_TYPE") == "Discord":
+    # https://discord.com/api/webhooks/<id>/<token>
+    APPRISE_URL = WEBHOOK_URL.replace(
+        "https://discord.com/api/webhooks/", "discord://"
+    )
+elif os.environ.get("WEBHOOK_TYPE") == "Telegram":
+    # https://api.telegram.org/bot<TOKEN>/sendMessage
+    token = WEBHOOK_URL.split("/bot")[1].split("/")[0]
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    APPRISE_URL = f"tgram://{token}/{chat_id}"
+else:
+    # assume the value is already a valid Apprise URL
+    APPRISE_URL = WEBHOOK_URL
+
+APPRISE.add(APPRISE_URL)
 
 # Iterate on fuel types
 for FUEL_TYPE in FUEL_TYPES:
@@ -107,32 +130,20 @@ for FUEL_TYPE in FUEL_TYPES:
     # Add price from API to price data file
     PRICE_DATA_FILE[FUEL_TYPE] = PRICE
 
-# Post any price changes to webhook
-if CONTENT != "":
+# Post any price changes through Apprise
+if CONTENT:
     CONTENT += (
         "Prices are correct as of "
-        + strftime(
-            "%a %d %b %Y %H:%M:%S",
-            localtime(LAST_UPDATED)
-        )
+        + strftime("%a %d %b %Y %H:%M:%S", localtime(LAST_UPDATED))
     )
     if os.environ.get("WEBHOOK_TYPE") == "Discord":
         CONTENT += "\n@everyone"
-        requests.post(
-            WEBHOOK_URL,
-            data={
-                "content": CONTENT
-            },
-            timeout=5
-        )
-    if os.environ.get("WEBHOOK_TYPE") == "Telegram":
-        requests.post(
-            WEBHOOK_URL,
-            params={
-                "chat_id": int(os.environ.get("TELEGRAM_CHAT_ID")),
-                "text": str(CONTENT)
-            }, timeout=5
-        )
+
+    APPRISE.notify(
+        title="Fuel price update",
+        body=CONTENT,
+        notify_type=NotifyType.INFO,
+    )
 
 # Write the current price to the JSON file
 with open("data/priceData.json", "w", encoding="utf-8") as file:
