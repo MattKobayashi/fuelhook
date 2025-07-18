@@ -2,6 +2,7 @@ import os
 import json
 from unittest.mock import patch, mock_open, MagicMock
 import pytest
+from apprise import NotifyType
 
 
 @pytest.fixture
@@ -33,22 +34,18 @@ def mock_stored_price_data():
     }
 
 
+@patch('apprise.Apprise.notify')
 @patch('requests.post')
-def test_telegram_webhook_posting(mock_post, mock_price_data, mock_stored_price_data):
+def test_telegram_webhook_posting(mock_post, mock_notify, mock_price_data, mock_stored_price_data):
     """Test that Telegram webhooks are posted correctly when prices change."""
     # Setup mock API response
     api_mock_response = MagicMock()
     api_mock_response.text = json.dumps(mock_price_data)
 
-    # Setup mock webhook response
-    webhook_mock_response = MagicMock()
-
     # Configure mock_post to return different responses based on the URL
     def side_effect(*args, **kwargs):
         if args[0] == "https://projectzerothree.info/api.php?format=json":
             return api_mock_response
-        elif args[0] == "https://example.com/webhook":
-            return webhook_mock_response
         return MagicMock()
 
     mock_post.side_effect = side_effect
@@ -69,26 +66,25 @@ def test_telegram_webhook_posting(mock_post, mock_price_data, mock_stored_price_
                             # This will run the script and should trigger the webhook post
                             __import__('main')
 
-                            # Check that a POST request was made to the webhook URL
-                            # Find the call to the webhook URL
-                            webhook_calls = [call for call in mock_post.call_args_list 
-                                           if call[0][0] == "https://example.com/webhook"]
-
-                            assert len(webhook_calls) == 1
-                            # Check that the post included the params with chat_id and text
-                            assert "params" in webhook_calls[0][1]
-                            assert webhook_calls[0][1]["params"]["chat_id"] == 123456789
-                            assert "text" in webhook_calls[0][1]["params"]
-                            assert "E10" in webhook_calls[0][1]["params"]["text"]
-                            # Telegram should use emoji instead of Discord format
-                            assert "⬇️" in webhook_calls[0][1]["params"]["text"]
+                            # one API call + one Apprise notify call expected
+                            mock_post.assert_called_once_with(
+                                "https://projectzerothree.info/api.php?format=json",
+                                headers={"User-Agent": "FuelHook v2.4.0"},
+                                timeout=5,
+                            )
+                            mock_notify.assert_called_once()
+                            assert "E10" in mock_notify.call_args.kwargs["body"]
+                            assert "⬇️" in mock_notify.call_args.kwargs["body"]
+                            assert mock_notify.call_args.kwargs["title"] == "Fuel price update"
+                            assert mock_notify.call_args.kwargs["notify_type"] == NotifyType.INFO
                         except Exception:
                             # The import might fail because we're patching, that's ok
                             pass
 
 
+@patch('apprise.Apprise.notify')
 @patch('requests.post')
-def test_no_webhook_on_unchanged_price(mock_post, mock_price_data):
+def test_no_webhook_on_unchanged_price(mock_post, mock_notify, mock_price_data):
     """Test that no webhook is posted when prices don't change."""
     # Modify the stored price data to match the API price (no change)
     stored_price_data = {
@@ -128,6 +124,7 @@ def test_no_webhook_on_unchanged_price(mock_post, mock_price_data):
                             # Check that only one POST was made (to the API, not to the webhook)
                             assert mock_post.call_count == 1
                             assert mock_post.call_args[0][0] == "https://projectzerothree.info/api.php?format=json"
+                            mock_notify.assert_not_called()
                         except Exception:
                             # The import might fail because we're patching, that's ok
                             pass
