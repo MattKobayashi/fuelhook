@@ -1,12 +1,11 @@
 [project]
 name = "fuelhook"
-version = "2.5.3"
+version = "3.0"
 description = "A 7-Elevel fuel price alert script"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12, <3.13"
 dependencies = [
     "apprise==1.9.3",
-    "requests==2.32.4",
 ]
 
 [dependency-groups]
