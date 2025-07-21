@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.4](https://github.com/MattKobayashi/fuelhook/compare/v3.0.3...v3.0.4) (2025-07-21)
+
+
+### Bug Fixes
+
+* **pyproject:** deps and version ([#144](https://github.com/MattKobayashi/fuelhook/issues/144)) ([d192cde](https://github.com/MattKobayashi/fuelhook/commit/d192cde7c55456e215d4bc6a03960133288e8349))
+
 ## [3.0.3](https://github.com/MattKobayashi/fuelhook/compare/v3.0.2...v3.0.3) (2025-07-18)
 
 
