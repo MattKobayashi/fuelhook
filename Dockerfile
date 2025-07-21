@@ -5,7 +5,7 @@ ENV SUPERCRONIC_VERSION="0.2.33-r5"
 # renovate: datasource=repology depName=alpine_3_22/tzdata versioning=loose
 ENV TZDATA_VERSION="2025b-r0"
 # renovate: datasource=repology depName=alpine_3_22/uv
-ENV UV_VERSION="0.7.9-r0"
+ENV UV_VERSION="0.7.22-r0"
 
 RUN apk add --no-cache \
     supercronic="${SUPERCRONIC_VERSION}" \
