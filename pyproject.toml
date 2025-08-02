@@ -5,7 +5,7 @@ description = "A 7-Elevel fuel price alert script"
 readme = "README.md"
 requires-python = ">=3.12, <3.13"
 dependencies = [
-    "apprise==1.9.3",
+    "apprise==1.9.4",
 ]
 
 [dependency-groups]
