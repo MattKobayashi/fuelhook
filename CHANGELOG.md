@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.5](https://github.com/MattKobayashi/fuelhook/compare/v3.0.4...v3.0.5) (2025-08-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency apprise to v1.9.4 ([#147](https://github.com/MattKobayashi/fuelhook/issues/147)) ([bccb289](https://github.com/MattKobayashi/fuelhook/commit/bccb289cfb8cef39839c9efc29ba44e07d9b8733))
+
 ## [3.0.4](https://github.com/MattKobayashi/fuelhook/compare/v3.0.3...v3.0.4) (2025-07-21)
 
 
