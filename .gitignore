@@ -1,6 +1,5 @@
 *.pkl
 .DS_Store
 .aider*
-uv.lock
 __pycache__/
 data/
