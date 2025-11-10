@@ -1,16 +1,26 @@
 FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412
 
-# renovate: datasource=repology depName=alpine_3_22/supercronic
-ENV SUPERCRONIC_VERSION="0.2.33-r8"
-# renovate: datasource=repology depName=alpine_3_22/tzdata versioning=loose
-ENV TZDATA_VERSION="2025b-r0"
-# renovate: datasource=repology depName=alpine_3_22/uv
-ENV UV_VERSION="0.7.22-r0"
+RUN apk --no-cache add \
+    curl \
+    jq \
+    tzdata \
+    uv
 
-RUN apk add --no-cache \
-    supercronic="${SUPERCRONIC_VERSION}" \
-    tzdata="${TZDATA_VERSION}" \
-    uv="${UV_VERSION}"
+# renovate: datasource=github-releases packageName=aptible/supercronic
+ENV SUPERCRONIC_VERSION="v0.2.39"
+ENV SUPERCRONIC="supercronic-linux-amd64"
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/${SUPERCRONIC}
+RUN export SUPERCRONIC_SHA256SUM=$(curl -fsSL \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    https://api.github.com/repos/aptible/supercronic/releases \
+    | jq -r '.[] | select(.name == $ENV.SUPERCRONIC_VERSION) | .assets[] | select(.name == $ENV.SUPERCRONIC) | .digest') \
+    && echo "SHA256 digest from API: ${SUPERCRONIC_SHA256SUM}" \
+    && curl -fsSLO "$SUPERCRONIC_URL" \
+    && echo "${SUPERCRONIC_SHA256SUM}  ${SUPERCRONIC}" | sed -e 's/^sha256://' | sha256sum -c - \
+    && chmod +x "$SUPERCRONIC" \
+    && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
+    && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
 WORKDIR /opt/fuelhook
 RUN addgroup -S fuelhook && adduser -S fuelhook -G fuelhook \
@@ -23,5 +33,5 @@ ENV TZ=UTC
 ENV REGION=0
 ENV WEBHOOK_URL=
 VOLUME ["/opt/fuelhook/data"]
-ENTRYPOINT ["/usr/bin/supercronic", "/opt/fuelhook/crontab/fuelhook-cron"]
+ENTRYPOINT ["/usr/local/bin/supercronic", "/opt/fuelhook/crontab/fuelhook-cron"]
 LABEL org.opencontainers.image.authors="MattKobayashi <matthew@kobayashi.au>"
