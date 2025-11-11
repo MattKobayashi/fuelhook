@@ -1,7 +1,7 @@
 ---
 env:
   REPO_NAME: mattkobayashi
-  IMAGE_NAME: template-container-python
+  IMAGE_NAME: fuelhook
 jobs:
   python:
     name: Python
