@@ -1,4 +1,4 @@
-requests==2.33.1
+requests==2.34.0
 pytest==9.0.3
 pytest-cov==7.1.0
 apprise>=1.7          # add the Apprise library
