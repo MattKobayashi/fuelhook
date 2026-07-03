@@ -11,7 +11,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.26@sha256:3d868e555f8f1dbc324afa005066cd11
 
 # Supercronic
 # renovate: datasource=github-releases packageName=aptible/supercronic
-ARG SUPERCRONIC_VERSION="v0.2.46"
+ARG SUPERCRONIC_VERSION="v0.2.47"
 ARG SUPERCRONIC="supercronic-linux-amd64"
 ARG SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/${SUPERCRONIC}
 RUN export SUPERCRONIC_SHA256SUM=$(curl -fsSL \
