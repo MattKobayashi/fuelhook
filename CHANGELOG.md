@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.15](https://github.com/MattKobayashi/fuelhook/compare/v3.0.14...v3.0.15) (2026-11-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency apprise to v2.3.0 ([#488](https://github.com/MattKobayashi/fuelhook/issues/488)) ([d096d66](https://github.com/MattKobayashi/fuelhook/commit/d096d66a05f91cd1050b97c39ee1be9574b10c23))
+
 ## [3.0.14](https://github.com/MattKobayashi/fuelhook/compare/v3.0.13...v3.0.14) (2026-11-08)
 
 
